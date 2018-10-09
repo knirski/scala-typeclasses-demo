@@ -19,6 +19,10 @@ object TypeclassForExternalType extends App {
       override def toJson(a: Instant): JsonValue = JsonString(a.toString)
     }
 
+    implicit def seqJsonable[A: Jsonable] = new Jsonable[Seq[A]] {
+      override def toJson(a: Seq[A]): JsonValue = JsonArray(a.map(implicitly[Jsonable[A]].toJson))
+    }
+
   }
 
   object DomainJson {
@@ -42,7 +46,7 @@ object TypeclassForExternalType extends App {
           "name" -> JsonString(g.name),
           "dateOfIntroduction" -> implicitly[Jsonable[Instant]].toJson(g.dateOfIntroduction),
           "vibrato" -> JsonBoolean(g.vibrato),
-          "popularisedBy" -> JsonArray(g.popularisedBy.map(implicitly[Jsonable[Person]].toJson))
+          "popularisedBy" -> implicitly[Jsonable[Seq[Person]]].toJson(g.popularisedBy)
         ))
       }
     }
